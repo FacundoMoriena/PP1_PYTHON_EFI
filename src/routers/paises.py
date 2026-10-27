@@ -3,7 +3,8 @@ from fastapi import APIRouter, HTTPException, Path, Depends, Query
 from models.pais_models import Pais, PaisPublic, PaisCreate
 from sqlmodel import Session, select
 from database import get_db
-
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlmodel import paginate
 
 paises_routers = APIRouter()
 
@@ -24,11 +25,12 @@ NO_ENCONTRADO = {
 
 @paises_routers.get(
     "/",
-    response_model=list[PaisPublic],
+    response_model=Page[PaisPublic],
 )
 async def getPaises(db: Session = Depends(get_db)):
-    paises = db.exec(select(Pais)).all()
-    return paises
+    
+    query = select(Pais)
+    return paginate(db,query)
 
 
 @paises_routers.get(
