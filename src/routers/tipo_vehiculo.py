@@ -21,6 +21,12 @@ NO_ENCONTRADO = {
     },
 }
 
+BORRADO_EXITOSO = {
+    204: {
+        "description": "Tipo de vehículo eliminado con éxito",
+    }
+}
+
 
 
 @tipo_vehiculo_routers.get(
@@ -46,7 +52,7 @@ async def obtenerTipoVehiculoId(
     if tipo_vehiculo_obtenido is not None:
         return tipo_vehiculo_obtenido
 
-    raise HTTPException(status_code=404, detail="País no encontrado")
+    raise HTTPException(status_code=404, detail="Tipo vehiculo no encontrado")
 
 
 @tipo_vehiculo_routers.post(
@@ -66,31 +72,52 @@ async def postTipoVehiculo(
     return nuevo_tipo_vehiculo
 
 
-@tipo_vehiculo_routers.delete(
+@tipo_vehiculo_routers.put(
     "/{id}",
     responses=NO_ENCONTRADO,
-    response_model=Union[TipoVehiculoPublic, list[TipoVehiculoPublic]],
+    response_model=TipoVehiculoPublic,
 )
-async def borrarTipoVehiculo(
+async def modificarTipoVehiculo(
+    id: Annotated[int, Path(gt=0)],
+    tipo_vehiculo_editado: TipoVehiculoCreate,
+    db: Session = Depends(get_db),
+) -> TipoVehiculoPublic:
+    tipo_vehiculo_obtenido = db.get(TipoVehiculo, id)
+
+    if not tipo_vehiculo_obtenido:
+        raise HTTPException(status_code=404, detail="Tipo vehiculo no encontrado")
+
+    tipo_vehiculo_obtenido.nombre = tipo_vehiculo_editado.nombre
+    tipo_vehiculo_obtenido.activo = tipo_vehiculo_editado.activo
+
+    db.commit()
+    db.refresh(tipo_vehiculo_obtenido)
+
+    return tipo_vehiculo_obtenido
+
+
+@tipo_vehiculo_routers.delete(
+    "/{id}",
+    status_code=204,
+    responses={**NO_ENCONTRADO, **BORRADO_EXITOSO},
+)
+def borrarTipoVehiculo(
     id: Annotated[int, Path(gt=0)],
     logico: Annotated[
         bool,
         Query(description="Mantener registro?"),
     ] = False,
     db: Session = Depends(get_db),
-) -> Union[TipoVehiculoPublic, list[TipoVehiculoPublic]]:
+) -> None:
     tipo_vehiculo_obtenido = db.get(TipoVehiculo, id)
 
     if not tipo_vehiculo_obtenido:
-        raise HTTPException(status_code=404, detail="País no encontrado")
+        raise HTTPException(status_code=404, detail="Tipo vehiculo no encontrado")
 
     if logico:
         tipo_vehiculo_obtenido.activo = False
-        db.commit()
-        db.refresh(tipo_vehiculo_obtenido)
-        return tipo_vehiculo_obtenido
+    else:
+        db.delete(tipo_vehiculo_obtenido)
 
-    db.delete(tipo_vehiculo_obtenido)
     db.commit()
-
-    return db.exec(select(TipoVehiculo)).all()
+    return None
