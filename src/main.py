@@ -4,6 +4,7 @@ from database import engine,SQLModel
 import models
 from routers.paises import paises_routers
 from routers.tipo_vehiculo import tipo_vehiculo_routers
+from routers.marcas import marcas_routers
 from fastapi_pagination import add_pagination
 
 #SQLModel.metadata.create_all(bind = engine)
@@ -13,6 +14,7 @@ app.title = "concesionaria vehiculos"
 #routers
 app.include_router(paises_routers,tags=["Paises"],prefix="/paises")
 app.include_router(tipo_vehiculo_routers,tags=["TiposVehiculos"],prefix="/tipo_vehiculos")
+app.include_router(marcas_routers,tags=["Marcas"],prefix="/marcas")
 
 
 

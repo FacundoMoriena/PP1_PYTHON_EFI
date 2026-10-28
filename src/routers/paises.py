@@ -1,6 +1,6 @@
 from typing import Annotated, Union
 from fastapi import APIRouter, HTTPException, Path, Depends, Query
-from models.pais_models import Pais, PaisPublic, PaisCreate
+from models.pais_models import Pais, PaisPublic, PaisCreate ,PaisPublicNested
 from sqlmodel import Session, select
 from database import get_db
 from fastapi_pagination import Page
@@ -21,6 +21,12 @@ NO_ENCONTRADO = {
     },
 }
 
+BORRADO_EXITOSO = {
+    204: {
+        "description": "País eliminado con éxito",
+    }
+}
+
 
 
 @paises_routers.get(
@@ -35,7 +41,7 @@ async def getPaises(db: Session = Depends(get_db)):
 
 @paises_routers.get(
     "/{id}",
-    response_model=PaisPublic,
+    response_model=PaisPublicNested,
     responses=NO_ENCONTRADO,
 )
 async def obtenerPaisId(
@@ -66,19 +72,43 @@ async def postPais(
     return nuevo_pais
 
 
-@paises_routers.delete(
+@paises_routers.put(
     "/{id}",
     responses=NO_ENCONTRADO,
-    response_model=Union[PaisPublic, list[PaisPublic]],
+    response_model=PaisPublic,
 )
-async def borrarPais(
+async def modificarPais(
+    id: Annotated[int, Path(gt=0)],
+    pais_editado: PaisCreate,
+    db: Session = Depends(get_db),
+) -> PaisPublic:
+    pais_obtenido = db.get(Pais, id)
+
+    if not pais_obtenido:
+        raise HTTPException(status_code=404, detail="País no encontrado")
+
+    pais_obtenido.nombre = pais_editado.nombre
+    pais_obtenido.activo = pais_editado.activo
+
+    db.commit()
+    db.refresh(pais_obtenido)
+
+    return pais_obtenido
+
+
+@paises_routers.delete(
+    "/{id}",
+    status_code=204,
+    responses={**NO_ENCONTRADO, **BORRADO_EXITOSO},
+)
+def borrarPais(
     id: Annotated[int, Path(gt=0)],
     logico: Annotated[
         bool,
         Query(description="Mantener registro?"),
     ] = False,
     db: Session = Depends(get_db),
-) -> Union[PaisPublic, list[PaisPublic]]:
+) -> None:
     pais_obtenido = db.get(Pais, id)
 
     if not pais_obtenido:
@@ -86,11 +116,8 @@ async def borrarPais(
 
     if logico:
         pais_obtenido.activo = False
-        db.commit()
-        db.refresh(pais_obtenido)
-        return pais_obtenido
+    else:
+        db.delete(pais_obtenido)
 
-    db.delete(pais_obtenido)
     db.commit()
-
-    return db.exec(select(Pais)).all()
+    return None
