@@ -21,3 +21,4 @@ def str_title(t:str):
 
 StrMayus = Annotated[str,Field(min_length=1,max_length=47),AfterValidator(str_mayus)]
 StrTitle = Annotated[str,Field(min_length=1,max_length=50),AfterValidator(str_title)]
+Precio = Annotated[int,Field(gt=0,lt=10**10)]

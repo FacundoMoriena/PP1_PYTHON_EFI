@@ -3,8 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from sqlmodel import SQLModel
-from src.models.pais_models import Pais
-from src.models.tipo_vehiculo_models import TipoVehiculo
+import src.models
 
 from alembic import context
 

@@ -1,6 +1,6 @@
 from typing import Annotated, Union
 from fastapi import APIRouter, HTTPException, Path, Depends, Query
-from models.tipo_vehiculo_models import TipoVehiculo,TipoVehiculoCreate,TipoVehiculoPublic
+from models.tipo_vehiculo_models import TipoVehiculo,TipoVehiculoCreate,TipoVehiculoPublic,TipoVehiculoPublicNested
 from sqlmodel import Session, select
 from database import get_db
 from fastapi_pagination import Page
@@ -41,7 +41,7 @@ async def getTipoVehiculo(db: Session = Depends(get_db)):
 
 @tipo_vehiculo_routers.get(
     "/{id}",
-    response_model=TipoVehiculoPublic,
+    response_model=TipoVehiculoPublicNested,
     responses=NO_ENCONTRADO,
 )
 async def obtenerTipoVehiculoId(
