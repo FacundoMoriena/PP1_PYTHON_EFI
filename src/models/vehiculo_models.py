@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class VehiculoBase(SQLModel):
     nombre: StrTitle
-    precio: float = Field(gt=0)
+    precio: float = Field(gt=0,lt=100000000)
     stock: int = Field(default=0, ge=0)
     url_image: str | None = Field(default=None,)
     descripcion: str | None = Field(default=None, max_length=500)

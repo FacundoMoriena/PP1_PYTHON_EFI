@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI):
 #SQLModel.metadata.create_all(bind = engine)
 app = FastAPI(lifespan=lifespan)
 app.title = "concesionaria vehiculos"
-app.description ="EFI_PP1 trabajo integrador"
+app.description ="EFI_PP1_Python trabajo integrador"
 
 #routers
 app.include_router(paises_routers,tags=["Paises"],prefix="/paises")
@@ -63,8 +63,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        #url front desplegado
+        "http://localhost:5173",
+        "https://alboriena-motors.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
