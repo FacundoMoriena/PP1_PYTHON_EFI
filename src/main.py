@@ -64,10 +64,12 @@ app.add_middleware(
     allow_origins=[
         "http://127.0.0.1:5500",
         "http://localhost:5500",
-        #url front desplegado
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
-
+    allow_headers=["*"],
 )
+
